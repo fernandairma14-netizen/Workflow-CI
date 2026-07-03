@@ -33,8 +33,12 @@ def train_model():
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Explicitly log the model
-        mlflow.sklearn.log_model(model, "model")
+        # Force classic artifact structure using save_model + log_artifacts
+        import shutil
+        if os.path.exists("model_tmp"):
+            shutil.rmtree("model_tmp")
+        mlflow.sklearn.save_model(model, "model_tmp")
+        mlflow.log_artifacts("model_tmp", artifact_path="model")
         
         y_pred = model.predict(X_test)
         acc = accuracy_score(y_test, y_pred)
@@ -45,8 +49,12 @@ def train_model():
             model = RandomForestClassifier(n_estimators=100, random_state=42)
             model.fit(X_train, y_train)
             
-            # Explicitly log the model
-            mlflow.sklearn.log_model(model, "model")
+            # Force classic artifact structure using save_model + log_artifacts
+            import shutil
+            if os.path.exists("model_tmp"):
+                shutil.rmtree("model_tmp")
+            mlflow.sklearn.save_model(model, "model_tmp")
+            mlflow.log_artifacts("model_tmp", artifact_path="model")
             
             # Predict
             y_pred = model.predict(X_test)
