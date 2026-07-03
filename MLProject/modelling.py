@@ -33,6 +33,9 @@ def train_model():
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
+        # Explicitly log the model
+        mlflow.sklearn.log_model(model, "model")
+        
         y_pred = model.predict(X_test)
         acc = accuracy_score(y_test, y_pred)
         print(f"Baseline Model trained successfully! Accuracy: {acc:.4f}")
@@ -41,6 +44,9 @@ def train_model():
             # Train baseline model
             model = RandomForestClassifier(n_estimators=100, random_state=42)
             model.fit(X_train, y_train)
+            
+            # Explicitly log the model
+            mlflow.sklearn.log_model(model, "model")
             
             # Predict
             y_pred = model.predict(X_test)
