@@ -29,12 +29,14 @@ def train_model():
     active_run = mlflow.active_run()
     if active_run:
         print(f"Active run detected: {active_run.info.run_id}")
-        model = RandomForestClassifier(n_estimators=100, random_state=42)
-        model.fit(X_train, y_train)
-        
-        y_pred = model.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
-        print(f"Baseline Model trained successfully! Accuracy: {acc:.4f}")
+        # Train baseline model inside the active run (nested=True avoids conflict)
+        with mlflow.start_run(nested=True, run_name="Basic_RandomForest_Diabetes"):
+            model = RandomForestClassifier(n_estimators=100, random_state=42)
+            model.fit(X_train, y_train)
+            
+            y_pred = model.predict(X_test)
+            acc = accuracy_score(y_test, y_pred)
+            print(f"Baseline Model trained successfully! Accuracy: {acc:.4f}")
     else:
         with mlflow.start_run(run_name="Basic_RandomForest_Diabetes"):
             # Train baseline model
