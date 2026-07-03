@@ -7,8 +7,9 @@ from sklearn.metrics import accuracy_score
 import os
 
 def train_model():
-    # Configure MLflow
-    mlflow.set_experiment("Diabetes_Prediction_Irma")
+    # Only set experiment if NOT running via `mlflow run`
+    if "MLFLOW_RUN_ID" not in os.environ:
+        mlflow.set_experiment("Diabetes_Prediction_Irma")
     
     # Load preprocessed data
     if not os.path.exists("diabetes_preprocessing.csv"):
@@ -26,17 +27,15 @@ def train_model():
     # KRITERIA 2 BASIC: Menggunakan autolog sepenuhnya
     mlflow.sklearn.autolog()
     
-    active_run = mlflow.active_run()
-    if active_run:
-        print(f"Active run detected: {active_run.info.run_id}")
-        # Train baseline model inside the active run (nested=True avoids conflict)
-        with mlflow.start_run(nested=True, run_name="Basic_RandomForest_Diabetes"):
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
-            model.fit(X_train, y_train)
-            
-            y_pred = model.predict(X_test)
-            acc = accuracy_score(y_test, y_pred)
-            print(f"Baseline Model trained successfully! Accuracy: {acc:.4f}")
+    # Check if a run was passed via environment (mlflow run) or is active
+    if "MLFLOW_RUN_ID" in os.environ or mlflow.active_run():
+        print("Running inside an existing MLflow run context.")
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        
+        y_pred = model.predict(X_test)
+        acc = accuracy_score(y_test, y_pred)
+        print(f"Baseline Model trained successfully! Accuracy: {acc:.4f}")
     else:
         with mlflow.start_run(run_name="Basic_RandomForest_Diabetes"):
             # Train baseline model
